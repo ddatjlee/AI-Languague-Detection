@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Language Detection</h1>
+    
+    <!-- Form phát hiện ngôn ngữ -->
+    <form id="detectionForm">
+        <textarea id="textInput" placeholder="Enter text here..." rows="4" cols="50"></textarea><br>
+        <button type="button" onclick="detectLanguage()">Detect Language</button>
+    </form>
+
+    <!-- Kết quả phát hiện -->
+    <div id="result"></div>
+
+    <hr>
+
+    <!-- Form phản hồi -->
+    <h2>Feedback</h2>
+    <form id="feedbackForm">
+        <textarea id="feedbackText" placeholder="Enter correct text..." rows="2" cols="50"></textarea><br>
+        <input type="text" id="feedbackLanguage" placeholder="Enter correct language"><br>
+        <button type="button" onclick="submitFeedback()">Submit Feedback</button>
+    </form>
+
+    <div id="feedbackMessage"></div>
+
+    <script>
+        // Hàm phát hiện ngôn ngữ
+        function detectLanguage() {
+            const text = document.getElementById("textInput").value;
+
+            // Gửi yêu cầu tới API detect
+            fetch("/detect", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = 
+                    `Detected Language: ${data.language} (Source: ${data.source})`;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("result").innerText = "Error detecting language.";
+            });
+        }
+
+        // Hàm gửi phản hồi
+        function submitFeedback() {
+            const text = document.getElementById("feedbackText").value;
+            const language = document.getElementById("feedbackLanguage").value;
+
+            // Gửi phản hồi tới API feedback
+            fetch("/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text, language }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("feedbackMessage").innerText = data.message;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("feedbackMessage").innerText = "Error submitting feedback.";
+            });
+        }
+    </script>
+</body>
+</html>
